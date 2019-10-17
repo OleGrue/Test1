@@ -59,9 +59,9 @@ def action_wrapper(hermes, intentMessage, conf):
             hermes.publish_end_session(intentMessage.session_id, summary)
         except:
             print "Unexpected error:", sys.exc_info()[0]
-            hermes.publish_end_session(intentMessage.session_id, "An error occured")
+            hermes.publish_end_session(intentMessage.session_id, "Eins")
     else:
-        hermes.publish_end_session(intentMessage.session_id, "An error occured")
+        hermes.publish_end_session(intentMessage.session_id, "Zwei "+str(intendMessage))
 
 
 
