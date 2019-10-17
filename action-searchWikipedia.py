@@ -1,20 +1,16 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import re
-import io
-import sys
-
-import ConfigParser
+import configparser
 from hermes_python.hermes import Hermes
+from hermes_python.ffi.utils import MqttOptions
 from hermes_python.ontology import *
-import wikipedia as wiki
+import io
 
 CONFIGURATION_ENCODING_FORMAT = "utf-8"
 CONFIG_INI = "config.ini"
 
-
-class SnipsConfigParser(ConfigParser.SafeConfigParser):
+class SnipsConfigParser(configparser.SafeConfigParser):
     def to_dict(self):
         return {section : {option_name : option for option_name, option in self.items(section)} for section in self.sections()}
 
@@ -25,9 +21,8 @@ def read_configuration_file(configuration_file):
             conf_parser = SnipsConfigParser()
             conf_parser.readfp(f)
             return conf_parser.to_dict()
-    except (IOError, ConfigParser.Error) as e:
+    except (IOError, configparser.Error) as e:
         return dict()
-
 
 def subscribe_intent_callback(hermes, intentMessage):
     conf = read_configuration_file(CONFIG_INI)
@@ -35,37 +30,12 @@ def subscribe_intent_callback(hermes, intentMessage):
 
 
 def action_wrapper(hermes, intentMessage, conf):
-    """
-
-    :param hermes:
-    :param intentMessage:
-    :param conf:
-    :return:
-    """
-    if len(intentMessage.slots.article_indicator) > 0:
-        article = intentMessage.slots.article_indicator.first().value
-        wiki.set_lang('de')
-        try:
-            results = wiki.search(article, 5)
-            lines = 2
-            summary = wiki.summary(results[0], lines)
-            if "==" in summary or len(summary) > 250:
-                # We hit the end of the article summary or hit a really long
-                # one.  Reduce to first line.
-                lines = 1
-                summary = wiki.summary(results[0], lines)
-
-            summary = re.sub(r'\([^)]*\)|/[^/]*/', '', summary).encode('utf8')
-            hermes.publish_end_session(intentMessage.session_id, summary)
-        except:
-            print "Unexpected error:", sys.exc_info()[0]
-            hermes.publish_end_session(intentMessage.session_id, "Eins")
-    else:
-        hermes.publish_end_session(intentMessage.session_id, "Zwei "+str(intendMessage))
-
+    {{#each action_code as |a|}}{{a}}
+    {{/each}}
 
 
 if __name__ == "__main__":
-    with Hermes("localhost:1883") as h:
-        h.subscribe_intent("CrystalMethod:searchWikipedia", subscribe_intent_callback) \
+    mqtt_opts = MqttOptions()
+    with Hermes(mqtt_options=mqtt_opts) as h:
+        h.subscribe_intent("{{intent_id}}", subscribe_intent_callback) \
          .start()
