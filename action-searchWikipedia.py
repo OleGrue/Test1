@@ -25,8 +25,9 @@ def read_configuration_file(configuration_file):
         return dict()
 
 def subscribe_intent_callback(hermes, intentMessage):
-    conf = read_configuration_file(CONFIG_INI)
-    action_wrapper(hermes, intentMessage, conf)
+    hermes.publish_end_session(intentMessage.session_id, str(intentMessage))
+    # conf = read_configuration_file(CONFIG_INI)
+    # action_wrapper(hermes, intentMessage, conf)
 
 
 def action_wrapper(hermes, intentMessage, conf):
